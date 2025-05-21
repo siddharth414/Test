@@ -32,3 +32,22 @@ resource "aws_budgets_budget" "this" {
     subscriber_email_addresses = [var.notification_email]
   }
 }
+
+
+variable "budget_name" {
+  description = "Base name of the budget (without year prefix)"
+  type        = string
+  default     = "genai-prod-monthly"
+}
+
+variable "budget_limit" {
+  description = "Monthly budget limit in USD"
+  type        = number
+  default     = 8000
+}
+
+variable "notification_email" {
+  description = "Email address to receive budget alerts"
+  type        = string
+  default     = "your-alert-email@example.com"
+}
