@@ -46,8 +46,8 @@ variable "budget_limit" {
   default     = 8000
 }
 
-variable "notification_email" {
-  description = "Email address to receive budget alerts"
-  type        = string
-  default     = "your-alert-email@example.com"
+variable "notification_emails" {
+  description = "List of email addresses to receive budget alerts"
+  type        = list(string)
+  default     = ["email1@example.com", "email2@example.com"]
 }
