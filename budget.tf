@@ -1,49 +1,34 @@
-resource "aws_budgets_budget" "prod_monthly_budget" {
-  name              = "Gen AI - Prod - Monthly budget"
+resource "terraform_data" "year" {
+  input = formatdate("YYYY", timestamp())
+}
+
+resource "aws_budgets_budget" "this" {
+  name              = "${terraform_data.year.input}_${var.budget_name}"
   budget_type       = "COST"
-  limit_amount      = "8000"
-  limit_unit        = "USD"
   time_unit         = "MONTHLY"
-  start_date        = "2025-04-01_00:00"
+  limit_amount      = var.budget_limit
+  limit_unit        = "USD"
+  time_period_start = "${terraform_data.year.input}-04-01_00:00"
+  time_period_end   = "${terraform_data.year.input}-12-31_23:59"
 
-  cost_filters = {}
-}
-
-resource "aws_budgets_budget_action" "alert_85_actual" {
-  budget_name        = aws_budgets_budget.prod_monthly_budget.name
-  action_type        = "NOTIFICATION"
-  notification_type  = "ACTUAL"
-  threshold_type     = "PERCENTAGE"
-  threshold          = 85
-
-  subscribers {
-    subscription_type = "EMAIL"
-    address           = "your-alert-email@example.com"
+  cost_filter {
+    name   = "CostCategory"
+    values = ["BudgetCostCategories${var.budget_name}"]
   }
-}
 
-resource "aws_budgets_budget_action" "alert_100_forecasted" {
-  budget_name        = aws_budgets_budget.prod_monthly_budget.name
-  action_type        = "NOTIFICATION"
-  notification_type  = "FORECASTED"
-  threshold_type     = "PERCENTAGE"
-  threshold          = 100
-
-  subscribers {
-    subscription_type = "EMAIL"
-    address           = "your-alert-email@example.com"
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 85
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "ACTUAL"
+    subscriber_email_addresses = [var.notification_email]
   }
-}
 
-resource "aws_budgets_budget_action" "alert_100_actual" {
-  budget_name        = aws_budgets_budget.prod_monthly_budget.name
-  action_type        = "NOTIFICATION"
-  notification_type  = "ACTUAL"
-  threshold_type     = "PERCENTAGE"
-  threshold          = 100
-
-  subscribers {
-    subscription_type = "EMAIL"
-    address           = "your-alert-email@example.com"
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 100
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "ACTUAL"
+    subscriber_email_addresses = [var.notification_email]
   }
 }
